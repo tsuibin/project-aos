@@ -12,6 +12,7 @@
 #include <QProcess>
 #include <QDir>
 #include <QFileInfoList>
+#include <QTimer>
 
 
 #endif // COMMON_H

@@ -16,20 +16,33 @@ Desktop::Desktop(QWidget *parent) :
     // 每行4个应用
     // 最多4行
     // 4行之后创建桌面的第二页
+    int appRow = 0;
+    int appCol = 0;
     for( int i = 0; i < appDir.entryInfoList().size(); i++)
     {
         if ( appDir.entryInfoList().at(i).isDir())
             if( appDir.entryInfoList().at(i).fileName().left(3) == QString("App")
                     && appDir.entryInfoList().at(i).fileName().size() >= 4)
             {
-                qDebug() << appDir.entryInfoList().at(i).fileName();
+
 
                 SetApp *w = new SetApp(this);
                 w->setAppDirName( appDir.entryInfoList().at(i).fileName() );
-                w->setGeometry(appCount*80+32*(appCount+1),20,80,90);
+                w->setGeometry(appCol*(80+32)+32,appRow*(90+32)+32,80,90);
+                qDebug() << appDir.entryInfoList().at(i).fileName()
+                         << "appCol" <<appCol
+                         << "appRow" <<appRow;
                 connect(w,SIGNAL(showDesktopSignal()),this,SLOT(show()));
                 connect(w,SIGNAL(appExecSignal()),this,SLOT(hide()));
+
                 appCount++;
+                appCol++;
+
+                if (appCol == 4)
+                {
+                    appCol = 0;
+                    appRow++;
+                }
 
                 // add to app list
 

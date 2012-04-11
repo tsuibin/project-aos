@@ -1,34 +1,30 @@
 #include "widget.h"
-#include "ui_widget.h"
 #include <QPixmap>
 
 SetApp::SetApp(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::SetApp)
+    QWidget(parent)
 {
-    //  ui->setupUi(this);
+
     setupUi(this);
     this->resize(80, 90);
     this->setWindowFlags(Qt::CustomizeWindowHint);
-    //   this->setWindowOpacity(0.5);
-    // /Application/AppNote
+    this->setAttribute(Qt::WA_TranslucentBackground, true);
 
     label_AppName->setAlignment(Qt::AlignHCenter);
-
+    label_AppName->setStyleSheet(QString::fromUtf8("color:white"));
+    label_AppName->setAttribute(Qt::WA_TranslucentBackground, true);
+    label_AppIcon->setAttribute(Qt::WA_TranslucentBackground, true);
     appRootPath = QString("/Application/");
     appStatus = 0;
+    mouseOn = false;
+    readyRun = false;
 
-
-//        QPalette pal = palette();
-//         pal.setColor(QPalette::Background, QColor(0x00,0xff,0x00,0x00));
-//         setPalette(pal);
 }
 
 SetApp::~SetApp()
 {
     delete label_AppIcon;
     delete label_AppName;
-    delete ui;
 }
 
 
@@ -68,10 +64,10 @@ void SetApp::setAppDirName(QString appDirName)
     QPixmap  pixMap = QPixmap(appLogoPath);
     QString appLabelName = appName;
     label_AppIcon->setPixmap(pixMap);
-
-    if (appLabelName.length() > 9)
+    int namelen = 10;
+    if (appLabelName.length() > namelen)
     {
-        appLabelName = appLabelName.left(9 - 3) + tr("...");
+        appLabelName = appLabelName.left(namelen - 3) + tr("...");
     }
     label_AppName->setText( appLabelName );
 
@@ -81,10 +77,59 @@ void SetApp::setAppDirName(QString appDirName)
 void SetApp::mouseMoveEvent ( QMouseEvent * event )
 {
     qDebug() << "mouse on this " << appName;
+    readyRun = false;
+    if(movingDistance >= 5)
+    {
+        qDebug()<<"move desktop!";
+    }
+    movingDistance++;
 }
 
+void SetApp::enterEvent ( QEvent * event )
+{
+    label_AppName->setStyleSheet(QString::fromUtf8("color: red"));
+
+}
+
+
+void SetApp::leaveEvent ( QEvent * event )
+{
+    label_AppName->setStyleSheet(QString::fromUtf8("color: white"));
+}
+
+void SetApp::mouseReleaseEvent ( QMouseEvent * event )
+{
+    qDebug() <<"mr" ;
+
+    if(readyRun == true)
+    {
+        qDebug() << "start up "<< appName;
+        if (appStatus == 1)
+        {
+            qDebug() << "app is running!";
+        }else{
+            appProcess = new QProcess();
+            appProcess->start(appFullPath);
+            connect(appProcess,SIGNAL(started()),this,SLOT(appRunning()));
+            connect(appProcess,SIGNAL(finished(int)),this,SLOT(appExiting()));
+            connect(appProcess,SIGNAL(destroyed()),this,SLOT(appClear()));
+            connect(appProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(appError()));
+            qDebug() << appProcess;
+
+        }
+    }
+
+}
+void SetApp::appManager()
+{
+    qDebug() << "appManager";
+    readyRun = false;
+
+}
 void SetApp::mousePressEvent ( QMouseEvent * event )
 {
+    qDebug() <<"mp" ;
+    movingDistance = 0;
 
     /*
     Qt::NoButton	0x00000000	The button state does not refer to any button (see QMouseEvent::button()).
@@ -97,21 +142,8 @@ void SetApp::mousePressEvent ( QMouseEvent * event )
     */
     if ( event->button() == Qt::LeftButton )
     {
-        qDebug() << "start up "<< appName;
-
-        if (appStatus == 1)
-        {
-            qDebug() << "app is running!";
-        }else{
-            appProcess = new QProcess();
-            appProcess->start(appFullPath);
-            connect(appProcess,SIGNAL(started()),this,SLOT(appRunning()));
-            connect(appProcess,SIGNAL(finished(int)),this,SLOT(appExiting()));
-            connect(appProcess,SIGNAL(destroyed()),this,SLOT(appClear()));
-            connect(appProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(appError()));
-            qDebug() << appProcess;
-        }
-
+        QTimer::singleShot(500, this, SLOT(appManager()));
+        readyRun = true;
     }
 }
 
@@ -120,6 +152,7 @@ void SetApp::appRunning()
     qDebug() << appName << " is running!";
     qDebug() << appProcess;
     appStatus = 1;
+    label_AppName->setStyleSheet(QString::fromUtf8("color: white"));
     emit appExecSignal();
 
 
@@ -144,6 +177,7 @@ void SetApp::appError()
 
 void SetApp::appClear()
 {
+
     emit showDesktopSignal();
     qDebug() << appProcess << " Free memory!";
 }
