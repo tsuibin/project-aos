@@ -20,3 +20,9 @@ HEADERS  += widget.h \
 
 FORMS    += widget.ui \
     desktop.ui
+
+OTHER_FILES += \
+    README.txt
+
+RESOURCES += \
+    aosres.qrc

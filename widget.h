@@ -15,12 +15,18 @@ public:
     explicit SetApp(QWidget *parent = 0);
     ~SetApp();
     void setAppDirName(QString appDirName);
+    QProcess * getProcessHandle();
 
 signals:
     void appExecSignal();
     void appExitSignal();
     void appErrorSignal();
+    void appManagerSignal();
     void showDesktopSignal();
+
+public slots:
+    void startAppManagerStatus();
+    void stopAppManagerStatus();
 
 protected slots:
     void appRunning();
@@ -28,6 +34,7 @@ protected slots:
     void appError();
     void appClear();
     void appManager();
+    void appShake();
     
 protected:
     void mousePressEvent ( QMouseEvent * event );
@@ -42,6 +49,7 @@ private:
     void setupUi(QWidget *SetApp);
     QLabel *label_AppIcon;
     QLabel *label_AppName;
+    QLabel *label_AppDelFlag;
     QString appName;
     QString appRootPath;
     QString appFullPath;
@@ -51,7 +59,9 @@ private:
     bool readyRun;
     bool    mouseOn;
     QTimer *appTimer;
+    QTimer *appShakeTimer;
     short movingDistance;
+    bool appManagerStatus;
 };
 
 #endif // WIDGET_H

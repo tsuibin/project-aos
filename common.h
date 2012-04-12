@@ -13,6 +13,10 @@
 #include <QDir>
 #include <QFileInfoList>
 #include <QTimer>
+#include <QList>
+#include <QPixmap>
+
+#define qDebug() qDebug() << __FILE__ << __LINE__
 
 
 #endif // COMMON_H

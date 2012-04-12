@@ -1,23 +1,25 @@
 #include "widget.h"
-#include <QPixmap>
+
+
+
+const char *appNameColorDefault = "font :bold; color: rgb(225, 225, 225);";
+const char *appNameColorHover = "font :bold ;color: white;";
 
 SetApp::SetApp(QWidget *parent) :
     QWidget(parent)
 {
 
     setupUi(this);
-    this->resize(80, 90);
+    this->resize(80, 88);
     this->setWindowFlags(Qt::CustomizeWindowHint);
-    this->setAttribute(Qt::WA_TranslucentBackground, true);
+    //this->setAttribute(Qt::WA_TranslucentBackground, true);
 
-    label_AppName->setAlignment(Qt::AlignHCenter);
-    label_AppName->setStyleSheet(QString::fromUtf8("color:white"));
-    label_AppName->setAttribute(Qt::WA_TranslucentBackground, true);
-    label_AppIcon->setAttribute(Qt::WA_TranslucentBackground, true);
+    this->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 0, 0);"));
     appRootPath = QString("/Application/");
     appStatus = 0;
     mouseOn = false;
     readyRun = false;
+    appManagerStatus = false;
 
 }
 
@@ -34,15 +36,70 @@ void SetApp::setupUi(QWidget *SetApp)
 {
     label_AppIcon = new QLabel(this);
     label_AppIcon->setObjectName(QString::fromUtf8("label_AppIcon"));
-    label_AppIcon->setGeometry(QRect(10, 0, 60, 60));
+    label_AppIcon->setGeometry(QRect(10, 8, 60, 60));
+
     label_AppName = new QLabel(this);
     label_AppName->setObjectName(QString::fromUtf8("label_AppName"));
-    label_AppName->setGeometry(QRect(0, 62, 80, 18));
+    label_AppName->setGeometry(QRect(0, 70, 80, 18));
 
- //   label_AppIcon->show();
- //  label_AppIcon->setWindowFlags(Qt::FramelessWindowHint | Qt::CustomizeWindowHint);
- //   label_AppName->show();
- //   label_AppName->setWindowFlags(Qt::CustomizeWindowHint);
+
+    //label_AppDelFlag->setAttribute(Qt::WA_TranslucentBackground, false);
+
+
+    label_AppName->setAlignment(Qt::AlignHCenter);
+    label_AppName->setStyleSheet(QString::fromUtf8( appNameColorDefault ));
+
+    label_AppName->setAttribute(Qt::WA_TranslucentBackground, true);
+    label_AppIcon->setAttribute(Qt::WA_TranslucentBackground, true);
+
+
+}
+void SetApp::startAppManagerStatus()
+{
+
+    appManagerStatus = true;
+    label_AppDelFlag = new QLabel(this);
+    label_AppDelFlag->setWindowFlags(Qt::CustomizeWindowHint);
+    label_AppDelFlag->setObjectName(QString::fromUtf8("label_AppDelFlag"));
+
+    label_AppDelFlag->setGeometry(QRect(5, 5, 22, 22));
+    QPixmap  pixMap = QPixmap(QString(":/images/close.png"));
+    label_AppDelFlag->setPixmap(pixMap);
+    label_AppDelFlag->setMask(pixMap.mask());
+    label_AppDelFlag->show();
+    appShakeTimer = new QTimer(this);
+    connect(appShakeTimer,SIGNAL(timeout()),this,SLOT(appShake()));
+    appShakeTimer->start(80);
+
+
+}
+void SetApp::appShake()
+{
+
+    int x = qrand() % 3;
+    int y = qrand() % 3;
+    const static int delFlag_x = label_AppDelFlag->x();
+    const static int delFlag_y = label_AppDelFlag->y();
+    const static int icon_x = label_AppIcon->x();
+    const static int icon_y = label_AppIcon->y();
+
+    label_AppIcon->move(icon_x + x,icon_y + y);
+    label_AppDelFlag->move(delFlag_x + x, delFlag_y +y);
+
+
+}
+void SetApp::stopAppManagerStatus()
+{
+    appShakeTimer->stop();
+    label_AppDelFlag->hide();
+
+    if(appManagerStatus)
+    {
+        delete label_AppDelFlag;
+        delete appShakeTimer;
+
+    }
+
 }
 void SetApp::paintEvent( QPaintEvent* )
  {
@@ -62,8 +119,9 @@ void SetApp::setAppDirName(QString appDirName)
     appLogoPath = appFullPath + QString(".png");
 
     QPixmap  pixMap = QPixmap(appLogoPath);
-    QString appLabelName = appName;
     label_AppIcon->setPixmap(pixMap);
+
+    QString appLabelName = appName;
     int namelen = 10;
     if (appLabelName.length() > namelen)
     {
@@ -72,8 +130,19 @@ void SetApp::setAppDirName(QString appDirName)
     label_AppName->setText( appLabelName );
 
 
+
 }
 
+QProcess * SetApp::getProcessHandle()
+{
+    QProcess *processHandle = NULL;
+
+    if(appStatus == 1)
+        processHandle = appProcess;
+
+
+    return processHandle;
+}
 void SetApp::mouseMoveEvent ( QMouseEvent * event )
 {
     qDebug() << "mouse on this " << appName;
@@ -87,43 +156,56 @@ void SetApp::mouseMoveEvent ( QMouseEvent * event )
 
 void SetApp::enterEvent ( QEvent * event )
 {
-    label_AppName->setStyleSheet(QString::fromUtf8("color: red"));
+    label_AppName->setStyleSheet(QString::fromUtf8( appNameColorHover ));
 
 }
 
 
 void SetApp::leaveEvent ( QEvent * event )
 {
-    label_AppName->setStyleSheet(QString::fromUtf8("color: white"));
+    label_AppName->setStyleSheet(QString::fromUtf8( appNameColorDefault ));
 }
 
 void SetApp::mouseReleaseEvent ( QMouseEvent * event )
 {
     qDebug() <<"mr" ;
+   // appTimer->stop();
 
-    if(readyRun == true)
+    if(appManagerStatus == true && readyRun == true)
     {
-        qDebug() << "start up "<< appName;
-        if (appStatus == 1)
+        qDebug() << "delete " << appName << "?";
+    }
+    else
+    {
+        if(readyRun == true)
         {
-            qDebug() << "app is running!";
-        }else{
-            appProcess = new QProcess();
-            appProcess->start(appFullPath);
-            connect(appProcess,SIGNAL(started()),this,SLOT(appRunning()));
-            connect(appProcess,SIGNAL(finished(int)),this,SLOT(appExiting()));
-            connect(appProcess,SIGNAL(destroyed()),this,SLOT(appClear()));
-            connect(appProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(appError()));
-            qDebug() << appProcess;
 
+
+            qDebug() << "start up "<< appName;
+            if (appStatus == 1)
+            {
+                qDebug() << "app is running!";
+            }else{
+                appProcess = new QProcess();
+                appProcess->start(appFullPath);
+                connect(appProcess,SIGNAL(started()),this,SLOT(appRunning()));
+                connect(appProcess,SIGNAL(finished(int)),this,SLOT(appExiting()));
+                connect(appProcess,SIGNAL(destroyed()),this,SLOT(appClear()));
+                connect(appProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(appError()));
+                qDebug() << appProcess;
+
+            }
         }
     }
 
 }
 void SetApp::appManager()
 {
-    qDebug() << "appManager";
-    readyRun = false;
+
+        qDebug() << "appManager";
+        readyRun = false;
+        emit appManagerSignal();
+        //startAppManagerStatus();
 
 }
 void SetApp::mousePressEvent ( QMouseEvent * event )
@@ -142,7 +224,12 @@ void SetApp::mousePressEvent ( QMouseEvent * event )
     */
     if ( event->button() == Qt::LeftButton )
     {
-        QTimer::singleShot(500, this, SLOT(appManager()));
+        appTimer = new QTimer;
+        connect(appTimer,SIGNAL(timeout()),this,SLOT(appManager()));
+        connect(appTimer,SIGNAL(timeout()),appTimer,SLOT(deleteLater()));
+        appTimer->start(500);
+        //QTimer::singleShot(500, this, SLOT(appManager()));
+
         readyRun = true;
     }
 }
@@ -152,7 +239,7 @@ void SetApp::appRunning()
     qDebug() << appName << " is running!";
     qDebug() << appProcess;
     appStatus = 1;
-    label_AppName->setStyleSheet(QString::fromUtf8("color: white"));
+    label_AppName->setStyleSheet(QString::fromUtf8( appNameColorDefault ));
     emit appExecSignal();
 
 
