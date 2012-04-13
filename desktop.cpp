@@ -12,6 +12,7 @@ Desktop::Desktop(QWidget *parent) :
         qDebug() << "Cannot find the app directory";
 
     int appCount = 0;
+    currentPage = 0;
 
     // 每行4个应用
     // 最多4行
@@ -59,24 +60,12 @@ Desktop::Desktop(QWidget *parent) :
     }
 
 
-
-
-
-//    SetApp *w = new SetApp(this);
-//    w->setAppDirName("AppNote");
-//    w->setGeometry(32,20,80,90);
-//    SetApp *a = new SetApp(this);
-//    a->setAppDirName("AppMusicPlayer");
-//    a->setGeometry(1*80+32*2,20,80,90);
-//    SetApp *b = new SetApp(this);
-//    b->setAppDirName("AppDownloadManger");
-//    b->setGeometry(2*80+32*3,20,80,90);
-//    SetApp *c = new SetApp(this);
-//    c->setAppDirName("AppBrowser");
-//    c->setGeometry(3*80+32*4,20,80,90);
-
-//    connect(w,SIGNAL(showDesktopSignal()),this,SLOT(show()));
-//    connect(w,SIGNAL(appExecSignal()),this,SLOT(hide()));
+    label_Page = new QLabel(this);
+    label_Page->setObjectName(QString::fromUtf8("label_Page"));
+    label_Page->setGeometry(QRect(0, 500, 480, 16));
+    label_Page->setAlignment(Qt::AlignHCenter);
+    label_Page->setText(QString::number(currentPage+1));
+    label_Page->setStyleSheet("color:white");
 
 
 }
@@ -133,11 +122,159 @@ void Desktop::mouseMoveEvent ( QMouseEvent * event )
     {
         appList.at(i)->move(appList.at(i)->x()+x,appList.at(i)->y());
     }
+    movingDistance += x;
     mouseOldPosX = event->x();
 }
 
 void Desktop::mousePressEvent ( QMouseEvent * event )
 {
+    movingDistance = 0;
     mouseOldPosX = event->x();
+    desktopPosFlag = event->x();
 }
 
+void Desktop::mouseReleaseEvent ( QMouseEvent * event )
+{
+    qDebug() << "mouseOldPosX" <<mouseOldPosX
+             <<"movingDistance"<<movingDistance
+             << "desktopPosFlag"<<desktopPosFlag;
+    //480/2 = 240
+
+    pageDirection = 0;
+
+    if (movingDistance > 200)
+    {
+        pageDirection = 1;
+    }
+    else if (movingDistance < (-200))
+    {
+        pageDirection = -1;
+    }
+    QString str = (movingDistance < (-200) ) ? "true":"false";
+    qDebug() << str;
+
+    automaticPage(pageDirection);
+
+}
+
+void Desktop::automaticPage(int direction)
+{
+    qDebug()<<"direction"<<direction;
+    switch(direction)
+    {
+    case 1:
+        previousPage();
+        break;
+    case -1:
+        nextPage();
+        break;
+    case 0:
+        returnCurrentPage();
+        break;
+    default:
+        break;
+
+    }
+
+}
+
+void Desktop::returnCurrentPage()
+{
+
+    qDebug() << "returnCurrentPage" << currentPage;
+
+    if (appList.size() > 0)
+    {
+        int tmp = appList.first()->x() - (32 +(currentPage*480));
+
+        if(tmp == 0)
+            return;
+
+        if(tmp > 0)
+        {
+            for(int i = 0;i < tmp;i++)
+            {
+                moveAppIcon(-1);
+            }
+        }else{
+            for(int i = 0;i > tmp;i--)
+            {
+                moveAppIcon(1);
+            }
+        }
+    }
+
+}
+void Desktop::checkMoveAppIcon()
+{
+
+}
+void Desktop::previousPage()
+{
+    currentPage--;
+    qDebug() << "currentPage" <<currentPage;
+
+    //x == 32+480
+    //x = 512
+
+    if (appList.size() > 0)
+    {
+        int tmp = appList.first()->x() + ((currentPage * 480)-32);
+
+        if(tmp == 0)
+            return;
+
+        if(tmp > 0)
+        {
+            for(int i = 0;i < tmp;i++)
+            {
+                moveAppIcon(-1);
+            }
+        }else{
+            for(int i = 0;i > tmp;i--)
+            {
+                moveAppIcon(1);
+            }
+        }
+    }
+    label_Page->setText(QString::number(currentPage+1));
+}
+
+void Desktop::nextPage()
+{
+    currentPage++;
+    qDebug() <<"currentPage" <<currentPage << appList.first()->x();
+
+    //480
+    //32 - 480 = ?
+    //448
+
+    // 0 --- 32
+    // 1 ----32 + 480
+    // 2 ----32 + 2*480
+    // 480-32 = 448
+    //x == -448
+    if (appList.size() > 0)
+    {
+        int tmp = appList.first()->x() + ((currentPage * 480)-32);
+
+        if(tmp == 0)
+            return;
+
+        if(tmp > 0)
+        {
+            for(int i = 0;i < tmp;i++)
+            {
+                moveAppIcon(-1);
+            }
+        }else{
+            for(int i = 0;i > tmp;i--)
+            {
+                moveAppIcon(1);
+            }
+        }
+    }
+
+    qDebug() << "appList.first()->x()" <<appList.first()->x();
+    label_Page->setText(QString::number(currentPage+1));
+}
