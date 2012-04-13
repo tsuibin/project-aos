@@ -39,7 +39,7 @@ Desktop::Desktop(QWidget *parent) :
                 connect(app,SIGNAL(showDesktopSignal()),this,SLOT(show()));
                 connect(app,SIGNAL(appExecSignal()),this,SLOT(hide()));
                 connect(app,SIGNAL(appManagerSignal()),this,SLOT(startAppManager()));
-
+                connect(app,SIGNAL(appMoveSignal(int)),this,SLOT(moveAppIcon(int)));
                 appCount++;
                 appCol++;
 
@@ -105,7 +105,13 @@ void Desktop::stopAppManager()
     }
   //  this->update();
 }
-
+void Desktop::moveAppIcon(int x)
+{
+    for(int i = 0; i < appList.size(); i++)
+    {
+        appList.at(i)->move(appList.at(i)->x()+x,appList.at(i)->y());
+    }
+}
 void Desktop::keyPressEvent ( QKeyEvent * event )
 {
     switch(event->key())
@@ -114,10 +120,24 @@ void Desktop::keyPressEvent ( QKeyEvent * event )
         stopAppManager();
         break;
 
-    default: break;
+    default:
+        break;
     }
 
 }
 
+void Desktop::mouseMoveEvent ( QMouseEvent * event )
+{
+    int x = event->x() - mouseOldPosX;
+    for(int i = 0; i < appList.size(); i++)
+    {
+        appList.at(i)->move(appList.at(i)->x()+x,appList.at(i)->y());
+    }
+    mouseOldPosX = event->x();
+}
 
+void Desktop::mousePressEvent ( QMouseEvent * event )
+{
+    mouseOldPosX = event->x();
+}
 

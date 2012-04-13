@@ -90,16 +90,13 @@ void SetApp::appShake()
 }
 void SetApp::stopAppManagerStatus()
 {
-    appShakeTimer->stop();
-    label_AppDelFlag->hide();
-
     if(appManagerStatus)
     {
+        appShakeTimer->stop();
+        label_AppDelFlag->hide();
         delete label_AppDelFlag;
         delete appShakeTimer;
-
     }
-
 }
 void SetApp::paintEvent( QPaintEvent* )
  {
@@ -145,13 +142,18 @@ QProcess * SetApp::getProcessHandle()
 }
 void SetApp::mouseMoveEvent ( QMouseEvent * event )
 {
-    qDebug() << "mouse on this " << appName;
+    qDebug() << "mouseMoveEvent " << event->x();
+    appTimer->stop();
     readyRun = false;
     if(movingDistance >= 5)
     {
         qDebug()<<"move desktop!";
     }
     movingDistance++;
+
+
+    emit appMoveSignal(event->x());
+
 }
 
 void SetApp::enterEvent ( QEvent * event )
@@ -202,7 +204,7 @@ void SetApp::mouseReleaseEvent ( QMouseEvent * event )
 void SetApp::appManager()
 {
 
-        qDebug() << "appManager";
+        qDebug() << "appManager ?";
         readyRun = false;
         emit appManagerSignal();
         //startAppManagerStatus();

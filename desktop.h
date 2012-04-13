@@ -18,13 +18,17 @@ public:
 
 protected:
     void keyPressEvent ( QKeyEvent * event );
+    void mouseMoveEvent ( QMouseEvent * event );
+    void mousePressEvent ( QMouseEvent * event );
 
 private slots:
     void startAppManager();
+    void moveAppIcon(int x);
 private:
     Ui::Desktop *ui;
     QList< SetApp *> appList;
     void stopAppManager();
+    int mouseOldPosX;
 };
 
 #endif // DESKTOP_H

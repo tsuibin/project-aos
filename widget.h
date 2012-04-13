@@ -23,6 +23,7 @@ signals:
     void appErrorSignal();
     void appManagerSignal();
     void showDesktopSignal();
+    void appMoveSignal(int x);
 
 public slots:
     void startAppManagerStatus();
