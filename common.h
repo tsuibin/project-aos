@@ -15,6 +15,7 @@
 #include <QTimer>
 #include <QList>
 #include <QPixmap>
+#include <QLineEdit>
 
 #define qDebug() qDebug() << __FILE__ << __LINE__
 

@@ -13,6 +13,7 @@ Desktop::Desktop(QWidget *parent) :
 
     int appCount = 0;
     currentPage = 0;
+    appManagerStatus = false;
 
     // 每行4个应用
     // 最多4行
@@ -20,6 +21,8 @@ Desktop::Desktop(QWidget *parent) :
     int appRow = 0;
     int appCol = 0;
     int size =   (appDir.entryInfoList().size() <= 16) ? appDir.entryInfoList().size() : 16;
+    int appPage = 0;
+    size = 17;
     for( int i = 0; appCount < size; i++)
     {
         if ( appDir.entryInfoList().at(i).isDir())
@@ -27,11 +30,21 @@ Desktop::Desktop(QWidget *parent) :
                     && appDir.entryInfoList().at(i).fileName().size() >= 4)
             {
 
+                if(appCount != 0 && (appCount%16) == 0)
+                {
+                    qDebug() << "appCount" <<appCount
+                             <<"appCount%16" <<appCount%16;
+                    appPage++;
+                    appRow = 0;
+                    qDebug() << "16 +1" <<this->width();
+                    qDebug() << appDir.entryInfoList().at(i).fileName();
+                }
+
 
                 SetApp *app = new SetApp(this);
                 app->setAppDirName( appDir.entryInfoList().at(i).fileName() );
-                app->setGeometry(appCol*(80+32)+32,appRow*(90+24)+24,80,90);
-                /**/
+                app->setGeometry(appCol*(80+32)+32 + (appPage*480),appRow*(90+24)+24,80,90);
+                /*
                 qDebug() << appDir.entryInfoList().at(i).fileName()
                          << "appCount"<<appCount
                          << "appCol" <<appCol
@@ -56,16 +69,38 @@ Desktop::Desktop(QWidget *parent) :
                 // appclass must design a appprocess interface
                 //desktop visti
 
+
+
             }
     }
 
 
+    //page tips label
     label_Page = new QLabel(this);
     label_Page->setObjectName(QString::fromUtf8("label_Page"));
     label_Page->setGeometry(QRect(0, 500, 480, 16));
     label_Page->setAlignment(Qt::AlignHCenter);
     label_Page->setText(QString::number(currentPage+1));
     label_Page->setStyleSheet("color:white");
+
+    //page 0 search label
+    qDebug() <<"this width" << this->width();
+    QLabel* label_Search;
+    label_Search = new QLabel(this);
+    label_Search->setObjectName(QString::fromUtf8("label_Search"));
+    label_Search->setGeometry(QRect(-480+10, 30, 60, 30));
+    label_Search->setAlignment(Qt::AlignHCenter);
+    label_Search->setText(QString::fromUtf8("Search"));
+    label_Search->setStyleSheet("font :bold; color:white");
+
+    QLineEdit *lineEdit_Search;
+    lineEdit_Search = new QLineEdit(this);
+    lineEdit_Search->setObjectName(QString::fromUtf8("lineEdit_Search"));
+    lineEdit_Search->setGeometry(QRect(-480+70,32, 400, 30));
+
+    desktopWidgetList << label_Search
+                         <<lineEdit_Search;
+
 
 
 }
@@ -79,27 +114,42 @@ Desktop::~Desktop()
 void Desktop::startAppManager()
 {
     qDebug() << "desktop manager";
+    appManagerStatus = true;
     for(int i = 0; i < appList.size(); i++)
     {
         appList.at(i)->startAppManagerStatus();
     }
-   // this->update();
+
 }
 void Desktop::stopAppManager()
 {
+
     qDebug() << "desktop manager";
-    for(int i = 0; i < appList.size(); i++)
+    if(appManagerStatus == true)
     {
-        appList.at(i)->stopAppManagerStatus();
+        for(int i = 0; i < appList.size(); i++)
+        {
+            appList.at(i)->stopAppManagerStatus();
+        }
+        appManagerStatus = false;
     }
-  //  this->update();
+
 }
 void Desktop::moveAppIcon(int x)
 {
+
     for(int i = 0; i < appList.size(); i++)
     {
         appList.at(i)->move(appList.at(i)->x()+x,appList.at(i)->y());
     }
+
+    for(int i = 0;i < desktopWidgetList.size(); i++)
+    {
+        desktopWidgetList.at(i)->move(desktopWidgetList.at(i)->x()+x,
+                                      desktopWidgetList.at(i)->y());
+    }
+
+
 }
 void Desktop::keyPressEvent ( QKeyEvent * event )
 {
@@ -118,10 +168,8 @@ void Desktop::keyPressEvent ( QKeyEvent * event )
 void Desktop::mouseMoveEvent ( QMouseEvent * event )
 {
     int x = event->x() - mouseOldPosX;
-    for(int i = 0; i < appList.size(); i++)
-    {
-        appList.at(i)->move(appList.at(i)->x()+x,appList.at(i)->y());
-    }
+
+    moveAppIcon(x);
     movingDistance += x;
     mouseOldPosX = event->x();
 }
@@ -153,7 +201,9 @@ void Desktop::mouseReleaseEvent ( QMouseEvent * event )
     QString str = (movingDistance < (-200) ) ? "true":"false";
     qDebug() << str;
 
-    automaticPage(pageDirection);
+
+        automaticPage(pageDirection);
+
 
 }
 
@@ -182,11 +232,19 @@ void Desktop::returnCurrentPage()
 {
 
     qDebug() << "returnCurrentPage" << currentPage;
+    bool changeFlag = false;
+    if(currentPage < 0)
+    {
+        currentPage = (-currentPage);
+        changeFlag = true;
+    }
 
     if (appList.size() > 0)
     {
-        int tmp = appList.first()->x() - (32 +(currentPage*480));
+        int tmp = appList.first()->x() - (32 +(currentPage*480));//512
+        qDebug() << "appList.first()->x()" <<appList.first()->x();
 
+        qDebug() <<"tmp" << tmp;
         if(tmp == 0)
             return;
 
@@ -202,6 +260,11 @@ void Desktop::returnCurrentPage()
                 moveAppIcon(1);
             }
         }
+    }
+
+    if(changeFlag == true)
+    {
+        currentPage = (-currentPage);
     }
 
 }
@@ -245,15 +308,6 @@ void Desktop::nextPage()
     currentPage++;
     qDebug() <<"currentPage" <<currentPage << appList.first()->x();
 
-    //480
-    //32 - 480 = ?
-    //448
-
-    // 0 --- 32
-    // 1 ----32 + 480
-    // 2 ----32 + 2*480
-    // 480-32 = 448
-    //x == -448
     if (appList.size() > 0)
     {
         int tmp = appList.first()->x() + ((currentPage * 480)-32);

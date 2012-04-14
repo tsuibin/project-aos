@@ -92,6 +92,7 @@ void SetApp::stopAppManagerStatus()
 {
     if(appManagerStatus)
     {
+        appManagerStatus = false;
         appShakeTimer->stop();
         label_AppDelFlag->hide();
         delete label_AppDelFlag;
@@ -152,7 +153,8 @@ void SetApp::mouseMoveEvent ( QMouseEvent * event )
     movingDistance++;
 
 
-    emit appMoveSignal(event->x());
+  //  emit appMoveSignal(event->x());
+    QWidget::mouseMoveEvent(event);
 
 }
 
@@ -200,6 +202,8 @@ void SetApp::mouseReleaseEvent ( QMouseEvent * event )
         }
     }
 
+    QWidget::mouseReleaseEvent(event);
+
 }
 void SetApp::appManager()
 {
@@ -234,6 +238,7 @@ void SetApp::mousePressEvent ( QMouseEvent * event )
 
         readyRun = true;
     }
+    QWidget::mousePressEvent(event);
 }
 
 void SetApp::appRunning()

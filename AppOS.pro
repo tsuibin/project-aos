@@ -18,8 +18,9 @@ HEADERS  += widget.h \
     common.h \
     desktop.h
 
-FORMS    += widget.ui \
-    desktop.ui
+FORMS    += \
+    desktop.ui \
+    test.ui
 
 OTHER_FILES += \
     README.txt

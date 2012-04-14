@@ -30,6 +30,7 @@ private:
     Ui::Desktop *ui;
     QLabel *label_Page;
     QList< SetApp *> appList;
+    QList< QWidget *> desktopWidgetList;
     void stopAppManager();
     int mouseOldPosX;
     int desktopPosFlag;
@@ -38,11 +39,13 @@ private:
     int appMoveFlag;
     int pageCenterPosX;
     int currentPage;
+
     void automaticPage(int direction);
     void previousPage();
     void nextPage();
     void returnCurrentPage();
     QTimer *appIconMovetimer;
+    bool appManagerStatus;
 
 
 };
