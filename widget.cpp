@@ -113,7 +113,9 @@ void SetApp::setAppDirName(QString appDirName)
 
 
     appName = appDirName.mid(3);
-    appFullPath = appRootPath + appDirName + QString('/') + appName;
+    appWorkingDirectory = appRootPath + appDirName + QString('/');
+    appFullPath = appWorkingDirectory + appName;
+
     appLogoPath = appFullPath + QString(".png");
 
     QPixmap  pixMap = QPixmap(appLogoPath);
@@ -144,7 +146,8 @@ QProcess * SetApp::getProcessHandle()
 void SetApp::mouseMoveEvent ( QMouseEvent * event )
 {
     qDebug() << "mouseMoveEvent " << event->x();
-    appTimer->stop();
+    if(appTimer->isActive())
+        appTimer->stop();
     readyRun = false;
     if(movingDistance >= 5)
     {
@@ -173,7 +176,9 @@ void SetApp::leaveEvent ( QEvent * event )
 void SetApp::mouseReleaseEvent ( QMouseEvent * event )
 {
     qDebug() <<"mr" ;
-   // appTimer->stop();
+    if(appTimer->isActive())
+        appTimer->stop();
+    delete appTimer;
 
     if(appManagerStatus == true && readyRun == true)
     {
@@ -192,6 +197,7 @@ void SetApp::mouseReleaseEvent ( QMouseEvent * event )
             }else{
                 appProcess = new QProcess();
                 appProcess->start(appFullPath);
+                appProcess->setWorkingDirectory(appWorkingDirectory);
                 connect(appProcess,SIGNAL(started()),this,SLOT(appRunning()));
                 connect(appProcess,SIGNAL(finished(int)),this,SLOT(appExiting()));
                 connect(appProcess,SIGNAL(destroyed()),this,SLOT(appClear()));
@@ -232,7 +238,7 @@ void SetApp::mousePressEvent ( QMouseEvent * event )
     {
         appTimer = new QTimer;
         connect(appTimer,SIGNAL(timeout()),this,SLOT(appManager()));
-        connect(appTimer,SIGNAL(timeout()),appTimer,SLOT(deleteLater()));
+
         appTimer->start(500);
         //QTimer::singleShot(500, this, SLOT(appManager()));
 

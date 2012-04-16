@@ -55,6 +55,7 @@ private:
     QString appRootPath;
     QString appFullPath;
     QString appLogoPath;
+    QString appWorkingDirectory;
     QProcess *appProcess;
     short appStatus;
     bool readyRun;

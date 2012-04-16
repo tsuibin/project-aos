@@ -68,9 +68,6 @@ Desktop::Desktop(QWidget *parent) :
 
                 // appclass must design a appprocess interface
                 //desktop visti
-
-
-
             }
     }
 
@@ -80,7 +77,7 @@ Desktop::Desktop(QWidget *parent) :
     label_Page->setObjectName(QString::fromUtf8("label_Page"));
     label_Page->setGeometry(QRect(0, 500, 480, 16));
     label_Page->setAlignment(Qt::AlignHCenter);
-    label_Page->setText(QString::number(currentPage+1));
+    label_Page->setText(QString::number(currentPage));
     label_Page->setStyleSheet("color:white");
 
     //page 0 search label
@@ -172,6 +169,10 @@ void Desktop::mouseMoveEvent ( QMouseEvent * event )
     moveAppIcon(x);
     movingDistance += x;
     mouseOldPosX = event->x();
+//    if(movingDistance >= 200)
+//    {
+//        automaticPageStatus = true;
+//    }
 }
 
 void Desktop::mousePressEvent ( QMouseEvent * event )
@@ -179,6 +180,7 @@ void Desktop::mousePressEvent ( QMouseEvent * event )
     movingDistance = 0;
     mouseOldPosX = event->x();
     desktopPosFlag = event->x();
+   // automaticPageStatus = false;
 }
 
 void Desktop::mouseReleaseEvent ( QMouseEvent * event )
@@ -187,9 +189,7 @@ void Desktop::mouseReleaseEvent ( QMouseEvent * event )
              <<"movingDistance"<<movingDistance
              << "desktopPosFlag"<<desktopPosFlag;
     //480/2 = 240
-
     pageDirection = 0;
-
     if (movingDistance > 200)
     {
         pageDirection = 1;
@@ -198,13 +198,7 @@ void Desktop::mouseReleaseEvent ( QMouseEvent * event )
     {
         pageDirection = -1;
     }
-    QString str = (movingDistance < (-200) ) ? "true":"false";
-    qDebug() << str;
-
-
-        automaticPage(pageDirection);
-
-
+    automaticPage(pageDirection);
 }
 
 void Desktop::automaticPage(int direction)
@@ -231,42 +225,24 @@ void Desktop::automaticPage(int direction)
 void Desktop::returnCurrentPage()
 {
 
-    qDebug() << "returnCurrentPage" << currentPage;
-    bool changeFlag = false;
-    if(currentPage < 0)
+    qDebug() << "returnCurrentPage" << movingDistance;
+    int tmp = movingDistance;
+    qDebug() <<"tmp" << tmp;
+    if(tmp == 0)
+        return;
+
+    if(tmp > 0)
     {
-        currentPage = (-currentPage);
-        changeFlag = true;
-    }
-
-    if (appList.size() > 0)
-    {
-        int tmp = appList.first()->x() - (32 +(currentPage*480));//512
-        qDebug() << "appList.first()->x()" <<appList.first()->x();
-
-        qDebug() <<"tmp" << tmp;
-        if(tmp == 0)
-            return;
-
-        if(tmp > 0)
+        for(int i = 0;i < tmp;i++)
         {
-            for(int i = 0;i < tmp;i++)
-            {
-                moveAppIcon(-1);
-            }
-        }else{
-            for(int i = 0;i > tmp;i--)
-            {
-                moveAppIcon(1);
-            }
+            moveAppIcon(-1);
+        }
+    }else{
+        for(int i = 0;i > tmp;i--)
+        {
+            moveAppIcon(1);
         }
     }
-
-    if(changeFlag == true)
-    {
-        currentPage = (-currentPage);
-    }
-
 }
 void Desktop::checkMoveAppIcon()
 {
@@ -300,7 +276,7 @@ void Desktop::previousPage()
             }
         }
     }
-    label_Page->setText(QString::number(currentPage+1));
+    label_Page->setText(QString::number(currentPage));
 }
 
 void Desktop::nextPage()
@@ -330,5 +306,5 @@ void Desktop::nextPage()
     }
 
     qDebug() << "appList.first()->x()" <<appList.first()->x();
-    label_Page->setText(QString::number(currentPage+1));
+    label_Page->setText(QString::number(currentPage));
 }

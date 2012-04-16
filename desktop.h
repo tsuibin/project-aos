@@ -39,6 +39,7 @@ private:
     int appMoveFlag;
     int pageCenterPosX;
     int currentPage;
+    bool automaticPageStatus;
 
     void automaticPage(int direction);
     void previousPage();
