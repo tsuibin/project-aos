@@ -7,6 +7,8 @@ Desktop::Desktop(QWidget *parent) :
 {
     ui->setupUi(this);
 
+   // this->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 85, 127);"));
+
     QDir appDir("/Application/");
     if (!appDir.exists())
         qDebug() << "Cannot find the app directory";
@@ -85,7 +87,7 @@ Desktop::Desktop(QWidget *parent) :
     QLabel* label_Search;
     label_Search = new QLabel(this);
     label_Search->setObjectName(QString::fromUtf8("label_Search"));
-    label_Search->setGeometry(QRect(-480+10, 30, 60, 30));
+    label_Search->setGeometry(QRect(-480+10, 40, 60, 30));
     label_Search->setAlignment(Qt::AlignHCenter);
     label_Search->setText(QString::fromUtf8("Search"));
     label_Search->setStyleSheet("font :bold; color:white");
@@ -94,6 +96,7 @@ Desktop::Desktop(QWidget *parent) :
     lineEdit_Search = new QLineEdit(this);
     lineEdit_Search->setObjectName(QString::fromUtf8("lineEdit_Search"));
     lineEdit_Search->setGeometry(QRect(-480+70,32, 400, 30));
+    lineEdit_Search->setStyleSheet("font :bold; color:white");
 
     desktopWidgetList << label_Search
                          <<lineEdit_Search;

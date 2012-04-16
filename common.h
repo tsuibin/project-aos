@@ -16,6 +16,7 @@
 #include <QList>
 #include <QPixmap>
 #include <QLineEdit>
+#include <QGLWidget>
 
 #define qDebug() qDebug() << __FILE__ << __LINE__
 
