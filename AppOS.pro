@@ -11,12 +11,15 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        widget.cpp \
-    desktop.cpp
+    desktop.cpp \
+    globalkeyboardevent.cpp \
+    setapp.cpp
 
-HEADERS  += widget.h \
+HEADERS  += \
     common.h \
-    desktop.h
+    desktop.h \
+    globalkeyboardevent.h \
+    setapp.h
 
 FORMS    += \
     desktop.ui \

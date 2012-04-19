@@ -1,6 +1,9 @@
 #include "desktop.h"
 #include "ui_desktop.h"
 
+#include "widget.h"
+#include "globalkeyboardevent.h"
+
 Desktop::Desktop(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Desktop)
@@ -9,6 +12,33 @@ Desktop::Desktop(QWidget *parent) :
 
    // this->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 85, 127);"));
 
+    initDesktopWidget();
+
+
+
+    QTimer::singleShot(500, this, SLOT(initGlobelKeyboardEvent()));
+
+}
+
+Desktop::~Desktop()
+{
+    delete ui;
+}
+
+void Desktop::initGlobelKeyboardEvent()
+{
+    GlobalKeyboardEvent *gloKbd = new GlobalKeyboardEvent();
+    connect(gloKbd,SIGNAL(escPressSignal()),this,SLOT(globelKeyboardEvent()));
+    gloKbd->start();
+}
+void Desktop::globelKeyboardEvent()
+{
+    qDebug() <<"esc press!";
+
+}
+
+void Desktop::initDesktopWidget()
+{
     QDir appDir("/Application/");
     if (!appDir.exists())
         qDebug() << "Cannot find the app directory";
@@ -100,14 +130,6 @@ Desktop::Desktop(QWidget *parent) :
 
     desktopWidgetList << label_Search
                          <<lineEdit_Search;
-
-
-
-}
-
-Desktop::~Desktop()
-{
-    delete ui;
 }
 
 

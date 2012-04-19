@@ -2,11 +2,15 @@
 #define DESKTOP_H
 
 #include "common.h"
-#include "widget.h"
+
 
 namespace Ui {
 class Desktop;
 }
+
+
+class SetApp;
+class GlobalKeyboardEvent;
 
 class Desktop : public QWidget
 {
@@ -15,6 +19,9 @@ class Desktop : public QWidget
 public:
     explicit Desktop(QWidget *parent = 0);
     ~Desktop();
+
+public slots:
+    void globelKeyboardEvent();
 
 protected:
     void keyPressEvent ( QKeyEvent * event );
@@ -26,12 +33,15 @@ private slots:
     void startAppManager();
     void moveAppIcon(int x);
     void checkMoveAppIcon();
+
+    void initGlobelKeyboardEvent();
+
 private:
     Ui::Desktop *ui;
     QLabel *label_Page;
     QList< SetApp *> appList;
     QList< QWidget *> desktopWidgetList;
-    void stopAppManager();
+    QTimer *appIconMovetimer;
     int mouseOldPosX;
     int desktopPosFlag;
     int movingDistance;
@@ -40,14 +50,14 @@ private:
     int pageCenterPosX;
     int currentPage;
     bool automaticPageStatus;
+    bool appManagerStatus;
 
+    void stopAppManager();
+    void initDesktopWidget();
     void automaticPage(int direction);
     void previousPage();
     void nextPage();
     void returnCurrentPage();
-    QTimer *appIconMovetimer;
-    bool appManagerStatus;
-
 
 };
 
