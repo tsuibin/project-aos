@@ -1,7 +1,7 @@
 #include "desktop.h"
 #include "ui_desktop.h"
 
-#include "widget.h"
+//#include "widget.h"
 #include "globalkeyboardevent.h"
 
 Desktop::Desktop(QWidget *parent) :
@@ -10,12 +10,11 @@ Desktop::Desktop(QWidget *parent) :
 {
     ui->setupUi(this);
 
-   // this->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 85, 127);"));
 
     initDesktopWidget();
 
 
-
+qDebug()<<"ini over!";
     QTimer::singleShot(500, this, SLOT(initGlobelKeyboardEvent()));
 
 }
@@ -31,17 +30,71 @@ void Desktop::initGlobelKeyboardEvent()
     connect(gloKbd,SIGNAL(escPressSignal()),this,SLOT(globelKeyboardEvent()));
     gloKbd->start();
 }
+
+QString Desktop::getSystemEnvironmentHomePath()
+{
+    return systemEnvironmentHomePath;
+}
 void Desktop::globelKeyboardEvent()
 {
     qDebug() <<"esc press!";
 
 }
+/*
+TODO:
+set desktop path = $HOME
+read *.desktop file info
+show *.desktop icon on appos
 
+*/
 void Desktop::initDesktopWidget()
 {
-    QDir appDir("/Application/");
+    QStringList environment = QProcess::systemEnvironment();
+    QString str, configFileName, configValue;
+    QString desktopDirName;
+    foreach(str,environment)
+    {
+       // qDebug() << str;
+        if (str.startsWith("HOME="))
+        {
+            systemEnvironmentHomePath = str.mid(sizeof("HOME=")-1);
+            configFileName = systemEnvironmentHomePath+"/.config/user-dirs.dirs";
+
+        }
+    }
+    QSettings dirConfig(configFileName, QSettings::IniFormat);
+    dirConfig.setIniCodec("UTF-8");
+
+    qDebug() << dirConfig.fileName();
+    configValue = dirConfig.value("XDG_DESKTOP_DIR").toString();
+    desktopDirName = configValue.mid(sizeof("$HOME/")-1);
+
+    systemEnvironmentDesktopPath =  systemEnvironmentHomePath + "/" + desktopDirName;
+
+
+
+
+    QDir appDir(systemEnvironmentDesktopPath);
     if (!appDir.exists())
         qDebug() << "Cannot find the app directory";
+
+
+    QFileInfoList fileList = appDir.entryInfoList();
+    QFileInfo fileInfo;
+
+    foreach(fileInfo ,fileList)
+    {
+        if (fileInfo.fileName().endsWith(".desktop"))
+        {
+            desktopEntryList.append(fileInfo.fileName());
+            qDebug() << fileInfo.filePath();
+        }
+    }
+    qDebug() <<desktopEntryList;
+
+
+
+
 
     int appCount = 0;
     currentPage = 0;
@@ -54,55 +107,44 @@ void Desktop::initDesktopWidget()
     int appCol = 0;
     int size =   (appDir.entryInfoList().size() <= 16) ? appDir.entryInfoList().size() : 16;
     int appPage = 0;
-    size = 17;
     for( int i = 0; appCount < size; i++)
     {
-        if ( appDir.entryInfoList().at(i).isDir())
-            if( appDir.entryInfoList().at(i).fileName().left(3) == QString("App")
-                    && appDir.entryInfoList().at(i).fileName().size() >= 4)
-            {
 
-                if(appCount != 0 && (appCount%16) == 0)
-                {
-                    qDebug() << "appCount" <<appCount
-                             <<"appCount%16" <<appCount%16;
-                    appPage++;
-                    appRow = 0;
-                    qDebug() << "16 +1" <<this->width();
-                    qDebug() << appDir.entryInfoList().at(i).fileName();
-                }
+        if(appCount != 0 && (appCount%16) == 0)
+        {
+            qDebug() << "appCount" <<appCount
+                     <<"appCount%16" <<appCount%16;
+            appPage++;
+            appRow = 0;
+            qDebug() << "16 +1" <<this->width();
+            qDebug() << appDir.entryInfoList().at(i).fileName();
+        }
 
 
-                SetApp *app = new SetApp(this);
-                app->setAppDirName( appDir.entryInfoList().at(i).fileName() );
-                app->setGeometry(appCol*(80+32)+32 + (appPage*480),appRow*(90+24)+24,80,90);
-                /*
-                qDebug() << appDir.entryInfoList().at(i).fileName()
-                         << "appCount"<<appCount
-                         << "appCol" <<appCol
-                         << "appRow" <<appRow;
-                /**/
-                connect(app,SIGNAL(showDesktopSignal()),this,SLOT(show()));
-                connect(app,SIGNAL(appExecSignal()),this,SLOT(hide()));
-                connect(app,SIGNAL(appManagerSignal()),this,SLOT(startAppManager()));
-                connect(app,SIGNAL(appMoveSignal(int)),this,SLOT(moveAppIcon(int)));
-                appCount++;
-                appCol++;
+        SetApp *app = new SetApp(this);
+        app->setDesktopEnter(appDir.entryInfoList().at(i));
 
-                if (appCol == 4)
-                {
-                    appCol = 0;
-                    appRow++;
-                }
+        app->setGeometry(appCol*(80+32)+32 + (appPage*480),appRow*(90+24)+24,80,90);
 
-                // add to app list
-                appList.append(app);
+        connect(app,SIGNAL(showDesktopSignal()),this,SLOT(show()));
+        connect(app,SIGNAL(appExecSignal()),this,SLOT(hide()));
+        connect(app,SIGNAL(appManagerSignal()),this,SLOT(startAppManager()));
+        connect(app,SIGNAL(appMoveSignal(int)),this,SLOT(moveAppIcon(int)));
+        appCount++;
+        appCol++;
 
-                // appclass must design a appprocess interface
-                //desktop visti
-            }
+        if (appCol == 4)
+        {
+            appCol = 0;
+            appRow++;
+        }
+
+
+        // add to app list
+        appList.append(app);
     }
 
+    return;
 
     //page tips label
     label_Page = new QLabel(this);
@@ -130,6 +172,8 @@ void Desktop::initDesktopWidget()
 
     desktopWidgetList << label_Search
                          <<lineEdit_Search;
+
+
 }
 
 

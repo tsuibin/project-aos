@@ -15,6 +15,7 @@ public:
     explicit SetApp(QWidget *parent = 0);
     ~SetApp();
     void setAppDirName(QString appDirName);
+    void setDesktopEnter(QFileInfo fileInfo);
     QProcess * getProcessHandle();
 
 signals:
@@ -52,11 +53,17 @@ private:
     QLabel *label_AppName;
     QLabel *label_AppDelFlag;
     QString appName;
+    QString desktopEnterName;
     QString appRootPath;
     QString appFullPath;
+    QString desktopEnterFullPath;
     QString appLogoPath;
+    QString desktopEnterLogo;
     QString appWorkingDirectory;
+    QString desktopEnterWorkingDirectory;
+
     QProcess *appProcess;
+    QFileInfo DesktopEnterFileInfo;
     short appStatus;
     bool readyRun;
     bool    mouseOn;

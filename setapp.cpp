@@ -15,7 +15,7 @@ SetApp::SetApp(QWidget *parent) :
     //this->setAttribute(Qt::WA_TranslucentBackground, true);
 
     this->setStyleSheet(QString::fromUtf8("background-color: rgb(85, 0, 0);"));
-    appRootPath = QString("/Application/");
+    appRootPath = QString("/home/tsuibin/桌面/");
     appStatus = 0;
     mouseOn = false;
     readyRun = false;
@@ -107,7 +107,38 @@ void SetApp::paintEvent( QPaintEvent* )
  }
 
 
+void SetApp::setDesktopEnter(QFileInfo desktopEnterFileInfo)
+{
+//app
 
+    desktopEnterName = desktopEnterFileInfo.fileName();
+    appName = desktopEnterName;
+
+    desktopEnterWorkingDirectory = desktopEnterFileInfo.filePath();
+    appWorkingDirectory = desktopEnterWorkingDirectory;
+
+    desktopEnterFullPath = desktopEnterFileInfo.filePath();
+    appFullPath = desktopEnterFullPath;
+
+    appLogoPath = desktopEnterLogo;
+
+//    QPixmap  pixMap = QPixmap(appLogoPath);
+//    label_AppIcon->setPixmap(pixMap);
+
+//    label_AppIcon->setPixmap(pixMap);
+
+    QString appLabelName = appName;
+    int namelen = 10;
+    if (appLabelName.length() > namelen)
+    {
+        appLabelName = appLabelName.left(namelen - 3) + tr("...");
+    }
+
+    label_AppName->setText( appLabelName );
+
+//text file
+
+}
 void SetApp::setAppDirName(QString appDirName)
 {
 

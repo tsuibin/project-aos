@@ -9,8 +9,6 @@ class Desktop;
 }
 
 
-class SetApp;
-class GlobalKeyboardEvent;
 
 class Desktop : public QWidget
 {
@@ -19,6 +17,7 @@ class Desktop : public QWidget
 public:
     explicit Desktop(QWidget *parent = 0);
     ~Desktop();
+    QString getSystemEnvironmentHomePath();
 
 public slots:
     void globelKeyboardEvent();
@@ -42,6 +41,9 @@ private:
     QList< SetApp *> appList;
     QList< QWidget *> desktopWidgetList;
     QTimer *appIconMovetimer;
+    QString systemEnvironmentHomePath;
+    QString systemEnvironmentDesktopPath;
+    QList< QString > desktopEntryList;
     int mouseOldPosX;
     int desktopPosFlag;
     int movingDistance;

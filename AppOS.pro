@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui widgets
 
 TARGET = aos
 TEMPLATE = app

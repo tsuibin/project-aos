@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtCore>
 #include <QObject>
 #include <QWidget>
@@ -19,9 +19,10 @@
 #include <QList>
 #include <QPixmap>
 #include <QLineEdit>
-#include <QGLWidget>
+#include <QWidget>
 #include <QRunnable>
 #include <QThread>
+#include <QSettings>
 
 
 
@@ -30,10 +31,11 @@
 #include <fcntl.h>
 #include <linux/input.h>
 #include <time.h>
+#include <unistd.h>
 
+#include "setapp.h"
 
-
-#define qDebug() qDebug() << __FILE__ << __LINE__
+//#define qDebug() qDebug() << __FILE__ << __LINE__
 
 
 #endif // COMMON_H

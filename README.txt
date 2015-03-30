@@ -1,4 +1,14 @@
-AppOS 安装说明
+2015.3.20
+/*
+桌面入口协议由AOS私有标准修改为 Desktop Entry Specification 1.0 标准
+http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
+
+新增
+systemEnvironmentDesktopPath
+
+*/
+
+AppOS 私有标准说明
 
 需要在系统根目录下创建
 
