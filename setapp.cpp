@@ -21,6 +21,31 @@ SetApp::SetApp(QWidget *parent) :
     readyRun = false;
     appManagerStatus = false;
 
+    QStringList environment = QProcess::systemEnvironment();
+    QString str;
+
+
+    foreach(str,environment)
+    {
+
+        if (str.startsWith("PATH="))
+        {
+            m_execPath = str.mid(sizeof("PATH=")-1);
+
+            //qDebug() << execCommand.split(":");
+            break;
+
+        }
+    }
+
+
+
+
+
+    iconPathList.append("/usr/share/icons/hicolor/48x48/apps/");
+    iconPathList.append("/usr/local/share/icons/hicolor/48x48/apps/");
+    iconPathList.append("/usr/share/icons/Deepin/apps/48/");
+
 }
 
 SetApp::~SetApp()
@@ -118,14 +143,50 @@ void SetApp::setDesktopEnter(QFileInfo desktopEnterFileInfo)
     appWorkingDirectory = desktopEnterWorkingDirectory;
 
     desktopEnterFullPath = desktopEnterFileInfo.filePath();
-    appFullPath = desktopEnterFullPath;
+    QSettings desktopEnterConfig(desktopEnterFullPath ,QSettings::IniFormat);
+    desktopEnterConfig.setIniCodec("UTF-8");
+    desktopEnterConfig.beginGroup("Desktop Entry");
 
-    appLogoPath = desktopEnterLogo;
 
-//    QPixmap  pixMap = QPixmap(appLogoPath);
-//    label_AppIcon->setPixmap(pixMap);
+    QString desktopEnterIconName = desktopEnterConfig.value("Icon").toString() + ".png";
+    // desktopEnterIconName.size() > 4 , has Icon
 
-//    label_AppIcon->setPixmap(pixMap);
+
+  //  qDebug() << "desktopEnterFullPath" <<desktopEnterFullPath;
+
+    appFullPath = desktopEnterConfig.value("Exec").toString(); //start app run this
+    qDebug() << "appFullPath" <<appFullPath;
+
+    if (desktopEnterIconName.size() > 4 )
+    {
+
+
+
+
+        for(int i = 0; i < iconPathList.size(); i++ )
+        {
+
+            desktopEnterLogo = iconPathList.at(i) + desktopEnterIconName;
+            if (QFile::exists(desktopEnterLogo))
+            {
+
+                appLogoPath = desktopEnterLogo;
+
+                QPixmap  pixMap = QPixmap(appLogoPath);
+                label_AppIcon->setPixmap(pixMap);
+
+                label_AppIcon->setPixmap(pixMap);
+                break;
+            }
+
+        }
+
+
+    }
+    else
+    {
+        qDebug() << "/usr/share/icons/hicolor/48x48/apps/ 没有找到图标";
+    }
 
     QString appLabelName = appName;
     int namelen = 10;
@@ -146,6 +207,7 @@ void SetApp::setAppDirName(QString appDirName)
     appName = appDirName.mid(3);
     appWorkingDirectory = appRootPath + appDirName + QString('/');
     appFullPath = appWorkingDirectory + appName;
+
 
     appLogoPath = appFullPath + QString(".png");
 
@@ -221,7 +283,7 @@ void SetApp::mouseReleaseEvent ( QMouseEvent * event )
         {
 
 
-            qDebug() << "start up "<< appName;
+            qDebug() << "start up "<< appName <<appFullPath;
             if (appStatus == 1)
             {
                 qDebug() << "app is running!";

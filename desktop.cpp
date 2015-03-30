@@ -80,6 +80,8 @@ void Desktop::initDesktopWidget()
 
 
     QFileInfoList fileList = appDir.entryInfoList();
+
+#if 0
     QFileInfo fileInfo;
 
     foreach(fileInfo ,fileList)
@@ -90,8 +92,13 @@ void Desktop::initDesktopWidget()
             qDebug() << fileInfo.filePath();
         }
     }
-    qDebug() <<desktopEntryList;
+    qDebug() <<desktopEntryList << appDir.entryInfoList().size();
 
+#endif
+
+
+qDebug() <<"fileList" <<fileList.size();
+qDebug() <<"appDir.entryInfoList().size() " <<appDir.entryInfoList().size() ;
 
 
 
@@ -105,7 +112,8 @@ void Desktop::initDesktopWidget()
     // 4行之后创建桌面的第二页
     int appRow = 0;
     int appCol = 0;
-    int size =   (appDir.entryInfoList().size() <= 16) ? appDir.entryInfoList().size() : 16;
+    int size =   appDir.entryInfoList().size() > 16 ? appDir.entryInfoList().size() : 16;
+    qDebug() <<"size" <<size;
     int appPage = 0;
     for( int i = 0; appCount < size; i++)
     {

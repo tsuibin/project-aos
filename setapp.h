@@ -61,6 +61,8 @@ private:
     QString desktopEnterLogo;
     QString appWorkingDirectory;
     QString desktopEnterWorkingDirectory;
+    QList <QString> iconPathList;
+    QString m_execPath;
 
     QProcess *appProcess;
     QFileInfo DesktopEnterFileInfo;
